@@ -22,6 +22,7 @@ func main() {
 	{
 		userRoutes.GET("/", GetUsers)
 		userRoutes.POST("/", CreateUser)
+		userRoutes.PUT("/:id", EditUser)
 	}
 
 	if err := r.Run(":5000"); err != nil {
@@ -49,5 +50,34 @@ func CreateUser(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"error": false,
+	})
+}
+
+func EditUser(c *gin.Context) {
+	id := c.Param("id")
+	var reqBody User
+	if err := c.ShouldBindJSON(&reqBody); err != nil {
+		c.JSON(422, gin.H{
+			"error":   true,
+			"message": "invalid request body",
+		})
+		return
+	}
+
+	for i, u := range Users {
+		if u.ID == id {
+			Users[i].Name = reqBody.Name
+			Users[i].Age = reqBody.Age
+
+			c.JSON(200, gin.H{
+				"error": false,
+			})
+			return
+		}
+	}
+
+	c.JSON(404, gin.H{
+		"error":   true,
+		"message": "invalid user id",
 	})
 }

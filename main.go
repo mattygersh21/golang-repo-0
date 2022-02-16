@@ -23,6 +23,7 @@ func main() {
 		userRoutes.GET("/", GetUsers)
 		userRoutes.POST("/", CreateUser)
 		userRoutes.PUT("/:id", EditUser)
+		userRoutes.DELETE("/:id", DeleteUser)
 	}
 
 	if err := r.Run(":5000"); err != nil {
@@ -68,6 +69,26 @@ func EditUser(c *gin.Context) {
 		if u.ID == id {
 			Users[i].Name = reqBody.Name
 			Users[i].Age = reqBody.Age
+
+			c.JSON(200, gin.H{
+				"error": false,
+			})
+			return
+		}
+	}
+
+	c.JSON(404, gin.H{
+		"error":   true,
+		"message": "invalid user id",
+	})
+}
+
+func DeleteUser(c *gin.Context) {
+	id := c.Param("id")
+
+	for i, u := range Users {
+		if u.ID == id {
+			Users = append(Users[:i], Users[i+1:]...)
 
 			c.JSON(200, gin.H{
 				"error": false,
